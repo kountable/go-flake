@@ -15,7 +15,6 @@ package flake
 import (
 	"errors"
 	"net"
-	"os"
 	"strconv"
 	"sync"
 	"time"
@@ -113,17 +112,15 @@ func getTimestamp() uint64 {
 
 // getHostId returns the host id using the IP address of the machine
 func getHostId() (uint64, error) {
-	h, err := os.Hostname()
-
+	addrs, err := net.InterfaceAddrs()
 	if err != nil {
 		return 0, err
 	}
 
-	addrs, err := net.LookupIP(h)
-	a := addrs[0]
+	a := addrs[0].String()
 	startPos := len(a) - 4
 	if startPos < 0 {
-		return 0, errors.New("invalid local IP address " + a.String())
+		return 0, errors.New("invalid local IP address " + a)
 	}
 	ip := (uint64(a[startPos]) << 24) + (uint64(a[startPos+1]) << 16) + (uint64(a[startPos+2]) << 8) + uint64(a[startPos+3])
 
